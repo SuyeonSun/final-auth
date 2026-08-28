@@ -25,7 +25,7 @@ These rules apply to every file under `frontend/`.
 Follow the convention used by `C:\Users\USER\Projects\inforactive-board`:
 
 1. Keep plain asynchronous API functions separate from React hooks, grouped by feature.
-2. Put the feature API functions in a file such as `features/boards/boards.ts` and the hooks in a neighboring file such as `features/boards/useBoards.ts`.
+2. Put feature API functions and their TanStack Query hooks together under `hooks/<feature>/`, such as `hooks/boards/boards.ts` and `hooks/boards/useBoards.ts`.
 3. API functions use the shared `ky` client, return typed data, and throw `Error` for unsuccessful responses.
 4. Expose each query or mutation key from the hook as a reusable `getKey` function.
 5. Use that same key function in `queryKey`, `mutationKey`, cache reads/updates, prefetching, and `invalidateQueries`.
@@ -108,6 +108,8 @@ Component
 
 Follow `../docs/auth-architecture.md` as the single source of truth for authentication.
 
+- Treat only `/login` and `/register` as public pages. Every other page requires authentication.
+- Redirect authenticated users away from `/login` and `/register` to the default authenticated page.
 - Do not add a frontend Redis/DB session store, Token Vault, `session_id`, or separate `session` cookie.
 - Store the backend-issued access and refresh tokens only in separate HttpOnly cookies managed by Next.js Route Handlers.
 - Never expose tokens to Client Components, Zustand, localStorage, TanStack Query, response JSON, URLs, or logs.

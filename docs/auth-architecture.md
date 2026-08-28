@@ -199,6 +199,9 @@ Next.js -> AT·RT 쿠키 삭제
 
 ## 11. 인증과 권한
 
+- 공개 페이지는 `/login`, `/register`뿐이다.
+- `/login`, `/register`를 제외한 모든 페이지는 로그인 후에만 접근할 수 있다.
+- 로그인한 사용자가 `/login` 또는 `/register`에 접근하면 기본 인증 페이지로 이동시킨다.
 - Proxy는 AT 쿠키 존재 여부를 이용한 낙관적 리다이렉트만 담당한다. 보호 경로에 AT가 없으면 로그인 페이지가 아니라 refresh Route Handler로 보내고, RT까지 없거나 유효하지 않을 때 로그인 페이지로 보낸다.
 - Proxy 또는 UI의 판단을 실제 권한 검사로 사용하지 않는다.
 - Next.js의 `server-only` DAL은 백엔드 호출과 SSR 리다이렉트를 통일한다.
