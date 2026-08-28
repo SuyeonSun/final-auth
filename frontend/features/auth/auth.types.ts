@@ -20,3 +20,7 @@ export type BackendLoginData = {
 export type LoginData = {
   user: UserDto;
 };
+
+export type RegisterData = {
+  user: UserDto;
+};
