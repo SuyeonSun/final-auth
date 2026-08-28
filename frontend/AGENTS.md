@@ -84,7 +84,7 @@ Use App Router Route Handlers under `app/api/**/route.ts` as a backend-for-front
 - Keep the upstream API base URL in one server-side configuration/environment value. Do not repeat hosts in route files and never expose server-only secrets through `NEXT_PUBLIC_*` variables.
 - Treat route handlers as a thin transport boundary: read and validate input, construct the upstream request, forward the response body and status, and avoid domain/UI state inside the route.
 - Validate JSON bodies, query parameters, and dynamic path parameters with Zod before forwarding them. Return a consistent typed `400` response for invalid input.
-- Forward the incoming `Authorization` header only when present. Forward only explicitly allowed headers and cookies; never blindly copy every incoming header.
+- Do not accept or forward a browser-provided `Authorization` header for authenticated application requests. Read the HttpOnly access-token cookie in the Route Handler and construct the backend `Authorization` header server-side. Forward only explicitly allowed non-auth headers; never blindly copy every incoming header or cookie.
 - Build upstream query strings with `URLSearchParams`. Preserve all parameters that affect the requested resource.
 - For JSON, read `await request.json()`, validate it, set `Content-Type: application/json`, and serialize the validated payload.
 - For file uploads, read `await request.formData()` and forward it as the request body without manually setting `Content-Type`, so the multipart boundary is generated correctly.
@@ -103,6 +103,16 @@ Component
   -> local app/api/**/route.ts
   -> upstream backend API
 ```
+
+## Authentication architecture
+
+Follow `../docs/auth-architecture.md` as the single source of truth for authentication.
+
+- Do not add a frontend Redis/DB session store, Token Vault, `session_id`, or separate `session` cookie.
+- Store the backend-issued access and refresh tokens only in separate HttpOnly cookies managed by Next.js Route Handlers.
+- Never expose tokens to Client Components, Zustand, localStorage, TanStack Query, response JSON, URLs, or logs.
+- Use the backend as the final authority for users, roles, token validation, refresh, and revocation.
+- Do not enable refresh-token rotation unless the architecture document is explicitly changed first.
 
 ## Implementation boundary
 

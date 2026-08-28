@@ -7,7 +7,7 @@
 이 문서는 Next.js 프론트엔드 서버와 백엔드 사이의 인증 API만 정의한다.
 
 ```text
-Next.js Frontend Server -> Backend API
+Next.js Frontend Server -> Spring Boot Backend API
 ```
 
 - 백엔드가 사용자, 권한, AT·RT의 최종 관리 주체다.
@@ -28,7 +28,7 @@ export type ApiResponse<T> = {
 - `code`는 프론트엔드 분기와 로깅에 사용하는 업무 코드다.
 - 반환 데이터가 없는 성공 응답은 `data: null`을 사용한다.
 - 오류도 동일한 Generic 구조를 사용한다.
-- AT·RT는 로그인과 refresh 응답에서만 반환한다.
+- AT·RT는 로그인 응답에서 반환하고, refresh 응답은 기존 RT를 유지한 채 새 AT만 반환한다.
 
 ## 3. 공통 타입
 
@@ -59,10 +59,10 @@ export type ValidationErrorData = {
 
 | 이름 | Method | URL | 인증 |
 | --- | --- | --- | --- |
-| 로그인 및 토큰 발급 | `POST` | `/auth/login` | 없음 |
-| 토큰 갱신 | `POST` | `/auth/refresh` | RT |
-| 로그아웃 및 RT 폐기 | `POST` | `/auth/logout` | RT |
-| 내 사용자 정보 조회 | `GET` | `/users/me` | AT |
+| 로그인 및 토큰 발급 | `POST` | `/api/auth/login` | 없음 |
+| 토큰 갱신 | `POST` | `/api/auth/refresh` | RT |
+| 로그아웃 및 RT 폐기 | `POST` | `/api/auth/logout` | RT |
+| 내 사용자 정보 조회 | `GET` | `/api/users/me` | AT |
 
 ## 5. API 상세
 
@@ -72,7 +72,7 @@ export type ValidationErrorData = {
 | --- | --- |
 | 이름 | 로그인 및 토큰 발급 |
 | Method | `POST` |
-| URL | `/auth/login` |
+| URL | `/api/auth/login` |
 | Request Header | `Content-Type: application/json` |
 | Request Body | `{ useremail: string; password: string }` |
 | Response Header | `Content-Type: application/json`, `Cache-Control: no-store` |
@@ -109,7 +109,7 @@ export type ValidationErrorData = {
 | --- | --- |
 | 이름 | AT·RT 갱신 |
 | Method | `POST` |
-| URL | `/auth/refresh` |
+| URL | `/api/auth/refresh` |
 | Request Header | `Content-Type: application/json` |
 | Request Body | `{ refreshToken: string }` |
 | Response Header | `Content-Type: application/json`, `Cache-Control: no-store` |
@@ -136,6 +136,7 @@ export type ValidationErrorData = {
 - 갱신 성공 시 새 AT와 AT 만료 시간만 반환하며 기존 RT를 계속 사용한다.
 - RT는 만료 또는 로그아웃 시 폐기한다.
 - 탈취된 RT는 만료·폐기 전까지 재사용될 수 있으므로 RT를 로그에 남기지 않고 저장 시 안전하게 보호한다.
+- AT 만료 시간은 15분, RT 만료 시간은 7일로 한다.
 
 ### 로그아웃 및 RT 폐기
 
@@ -143,7 +144,7 @@ export type ValidationErrorData = {
 | --- | --- |
 | 이름 | 로그아웃 및 RT 폐기 |
 | Method | `POST` |
-| URL | `/auth/logout` |
+| URL | `/api/auth/logout` |
 | Request Header | `Content-Type: application/json` |
 | Request Body | `{ refreshToken: string }` |
 | Response Header | `Content-Type: application/json`, `Cache-Control: no-store` |
@@ -167,7 +168,7 @@ export type ValidationErrorData = {
 | --- | --- |
 | 이름 | 내 사용자 정보 조회 |
 | Method | `GET` |
-| URL | `/users/me` |
+| URL | `/api/users/me` |
 | Request Header | `Authorization: Bearer <accessToken>` |
 | Request Body | 없음 |
 | Response Header | `Content-Type: application/json`, `Cache-Control: private, no-store` |
@@ -200,14 +201,18 @@ Authorization: Bearer <accessToken>
 
 - AT가 없거나 잘못됐거나 만료되면 `401`을 반환한다.
 - 인증됐지만 권한이 부족하면 `403`을 반환한다.
-- AT 만료 시 Next.js가 `/auth/refresh`를 호출하고 원 요청을 최대 한 번 재시도한다.
+- AT 만료 시 Next.js가 백엔드 `/api/auth/refresh`를 호출하고 원 요청을 최대 한 번 재시도한다.
 - 백엔드는 사용자 및 역할의 최신 상태를 기준으로 권한을 검사한다.
 
-## 7. 구현 전 미확정 사항
+## 7. 구현 환경 및 미확정 사항
 
-- 백엔드 API base URL과 버전 prefix (`/api/v1` 등)
+- 백엔드는 Spring Boot, Gradle, H2로 구현한다.
+- 모든 백엔드 API prefix는 `/api`로 통일한다.
+- AT 만료 시간은 15분, RT 만료 시간은 7일로 한다.
+
+남은 미확정 사항:
+
 - `UserDto` 최종 필드
-- AT·RT 만료 시간
 - 전체 기기 로그아웃 API 필요 여부
 - 업무 code 네이밍 규칙의 최종 확정
 
