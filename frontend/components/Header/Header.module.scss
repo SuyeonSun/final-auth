@@ -7,10 +7,31 @@
   background: #fff;
 }
 
+.left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
 .logo {
   color: #172033;
   font-weight: 700;
   text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 16px;
+
+  a {
+    color: #59657a;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: #315bd6;
+    }
+  }
 }
 
 .user {

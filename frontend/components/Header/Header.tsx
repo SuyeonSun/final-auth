@@ -15,9 +15,18 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <Link className={styles.logo} href="/">
-        Final Auth
-      </Link>
+      <div className={styles.left}>
+        <Link className={styles.logo} href="/">
+          Final Auth
+        </Link>
+
+        {isPublicRoute ? null : (
+          <nav className={styles.nav}>
+            <Link href="/">홈</Link>
+            <Link href="/ev">대시보드</Link>
+          </nav>
+        )}
+      </div>
 
       {isPending ? null : user ? (
         <span className={styles.user}>{user.username}님</span>
