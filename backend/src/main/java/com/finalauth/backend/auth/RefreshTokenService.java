@@ -15,20 +15,20 @@ import java.util.Optional;
 @Service
 public class RefreshTokenService {
 
-	private static final long EXPIRATION_DAYS = 7;
-
 	private final SecureRandom secureRandom = new SecureRandom();
 	private final RefreshTokenRepository refreshTokenRepository;
+	private final RefreshTokenProperties properties;
 
-	public RefreshTokenService(RefreshTokenRepository refreshTokenRepository) {
+	public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, RefreshTokenProperties properties) {
 		this.refreshTokenRepository = refreshTokenRepository;
+		this.properties = properties;
 	}
 
 	public IssuedRefreshToken issue(User user) {
 		byte[] randomBytes = new byte[32];
 		secureRandom.nextBytes(randomBytes);
 		String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-		Instant expiresAt = Instant.now().plus(EXPIRATION_DAYS, ChronoUnit.DAYS);
+		Instant expiresAt = Instant.now().plus(properties.expirationSeconds(), ChronoUnit.SECONDS);
 
 		refreshTokenRepository.save(new RefreshToken(hash(rawToken), user, expiresAt));
 

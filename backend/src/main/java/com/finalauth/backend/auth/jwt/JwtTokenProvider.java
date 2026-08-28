@@ -17,16 +17,16 @@ import java.util.Date;
 public class JwtTokenProvider {
 
 	private final SecretKey key;
-	private final long accessTokenExpirationMinutes;
+	private final long accessTokenExpirationSeconds;
 
 	public JwtTokenProvider(JwtProperties properties) {
 		this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
-		this.accessTokenExpirationMinutes = properties.accessTokenExpirationMinutes();
+		this.accessTokenExpirationSeconds = properties.accessTokenExpirationSeconds();
 	}
 
 	public GeneratedAccessToken generateAccessToken(User user) {
 		Instant now = Instant.now();
-		Instant expiresAt = now.plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES);
+		Instant expiresAt = now.plus(accessTokenExpirationSeconds, ChronoUnit.SECONDS);
 
 		String token = Jwts.builder()
 				.subject(user.getId())
