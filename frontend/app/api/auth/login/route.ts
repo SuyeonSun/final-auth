@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 import type { BackendLoginData, LoginData } from "@/features/auth/auth.types";
 import { loginSchema } from "@/features/auth/login/login.schema";
 import { getBackendApi } from "@/lib/api/backendApi";
-import {
-  AUTH_COOKIE,
-  AUTH_COOKIE_BASE_OPTIONS,
-} from "@/lib/auth/cookies";
+import { setAuthCookies } from "@/lib/auth/cookies";
 import type {
   ApiResponse,
   ValidationErrorData,
@@ -60,38 +57,7 @@ export async function POST(request: Request) {
       },
     };
     const response = NextResponse.json(body);
-    const accessTokenExpiresAt = new Date(
-      result.data.tokens.accessTokenExpiresAt,
-    );
-    const refreshTokenExpiresAt = new Date(
-      result.data.tokens.refreshTokenExpiresAt,
-    );
-
-    if (
-      Number.isNaN(accessTokenExpiresAt.getTime()) ||
-      Number.isNaN(refreshTokenExpiresAt.getTime())
-    ) {
-      throw new Error("백엔드 토큰 만료 시간이 올바르지 않습니다.");
-    }
-
-    response.cookies.set(
-      AUTH_COOKIE.accessToken,
-      result.data.tokens.accessToken,
-      {
-        ...AUTH_COOKIE_BASE_OPTIONS,
-        expires: accessTokenExpiresAt,
-        path: "/",
-      },
-    );
-    response.cookies.set(
-      AUTH_COOKIE.refreshToken,
-      result.data.tokens.refreshToken,
-      {
-        ...AUTH_COOKIE_BASE_OPTIONS,
-        expires: refreshTokenExpiresAt,
-        path: "/api/auth",
-      },
-    );
+    setAuthCookies(response, result.data.tokens);
 
     return response;
   } catch {

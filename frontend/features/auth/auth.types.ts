@@ -5,10 +5,13 @@ export type UserDto = {
   roles: string[];
 };
 
-export type TokenPair = {
+export type AccessTokenData = {
   accessToken: string;
-  refreshToken: string;
   accessTokenExpiresAt: string;
+};
+
+export type TokenPair = AccessTokenData & {
+  refreshToken: string;
   refreshTokenExpiresAt: string;
 };
 
@@ -23,4 +26,8 @@ export type LoginData = {
 
 export type RegisterData = {
   user: UserDto;
+};
+
+export type BackendRefreshData = {
+  token: AccessTokenData;
 };
