@@ -1,17 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-import { PUBLIC_ROUTES } from "@/constants/auth";
 import { useMeQuery } from "@/hooks/user/useMe";
 
 import styles from "./Header.module.scss";
 
 export function Header() {
-  const pathname = usePathname();
-  const isPublicRoute = PUBLIC_ROUTES.has(pathname);
-  const { data: user, isPending } = useMeQuery(!isPublicRoute);
+  const { data: user, isPending } = useMeQuery();
 
   return (
     <header className={styles.header}>
@@ -20,12 +16,10 @@ export function Header() {
           Final Auth
         </Link>
 
-        {isPublicRoute ? null : (
-          <nav className={styles.nav}>
-            <Link href="/">홈</Link>
-            <Link href="/ev">대시보드</Link>
-          </nav>
-        )}
+        <nav className={styles.nav}>
+          <Link href="/">홈</Link>
+          <Link href="/ev">대시보드</Link>
+        </nav>
       </div>
 
       {isPending ? null : user ? (

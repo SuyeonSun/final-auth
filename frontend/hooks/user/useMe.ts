@@ -5,11 +5,10 @@ import type { ApiError } from "@/lib/api/ApiError";
 
 import { getMe } from "./me";
 
-export function useMeQuery(enabled: boolean) {
+export function useMeQuery() {
   return useQuery<UserDto, ApiError>({
     queryKey: useMeQuery.getKey(),
     queryFn: getMe,
-    enabled,
     retry: false,
   });
 }
