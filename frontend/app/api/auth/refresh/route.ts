@@ -27,16 +27,6 @@ type RefreshOutcome =
 async function refreshAccessToken(request: NextRequest): Promise<RefreshOutcome> {
   const refreshToken = request.cookies.get(AUTH_COOKIE.refreshToken)?.value;
 
-  if (!refreshToken) {
-    return {
-      ok: false,
-      status: 401,
-      code: "AUTH_REFRESH_TOKEN_MISSING",
-      message: "로그인이 필요합니다.",
-      clearCookies: true,
-    };
-  }
-
   try {
     const backendResponse = await getBackendApi().post("api/auth/refresh", {
       json: { refreshToken },
@@ -51,7 +41,9 @@ async function refreshAccessToken(request: NextRequest): Promise<RefreshOutcome>
         status: backendResponse.status,
         code: result.code,
         message: result.message,
-        clearCookies: backendResponse.status === 401,
+        // refreshToken이 비어 있으면 백엔드가 401이 아니라 400(AUTH_VALIDATION_FAILED)으로 응답한다.
+        // RefreshRequest의 유일한 필드가 refreshToken이라 이 400은 곧 "세션 없음"과 동치이므로 함께 정리한다.
+        clearCookies: backendResponse.status === 401 || backendResponse.status === 400,
       };
     }
 

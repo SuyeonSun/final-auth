@@ -8,21 +8,9 @@ import type { ApiResponse } from "@/types/api";
 export async function GET(request: NextRequest) {
   const accessToken = request.cookies.get(AUTH_COOKIE.accessToken)?.value;
 
-  if (!accessToken) {
-    const body: ApiResponse<null> = {
-      code: "AUTH_ACCESS_TOKEN_MISSING",
-      message: "로그인이 필요합니다.",
-      data: null,
-    };
-
-    return NextResponse.json(body, { status: 401 });
-  }
-
   try {
     const backendResponse = await getBackendApi().get("api/users/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     });
     const result = await backendResponse.json<ApiResponse<UserDto | null>>();
     const response = NextResponse.json(result, {

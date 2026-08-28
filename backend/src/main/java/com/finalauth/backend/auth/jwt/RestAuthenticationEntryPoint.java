@@ -26,10 +26,16 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 			HttpServletResponse response,
 			AuthenticationException authException
 	) throws IOException {
+		boolean expired = request.getAttribute(JwtAuthenticationFilter.TOKEN_STATUS_ATTRIBUTE)
+				== JwtTokenProvider.TokenStatus.EXPIRED;
+
+		String code = expired ? "AUTH_ACCESS_TOKEN_EXPIRED" : "AUTH_ACCESS_TOKEN_INVALID";
+		String message = expired ? "액세스 토큰이 만료되었습니다." : "인증이 필요합니다.";
+
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(objectMapper.writeValueAsString(
-				ApiResponse.of("AUTH_ACCESS_TOKEN_INVALID", "인증이 필요합니다.", null)));
+				ApiResponse.of(code, message, null)));
 	}
 }

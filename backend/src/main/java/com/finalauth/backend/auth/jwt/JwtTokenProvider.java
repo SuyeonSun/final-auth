@@ -2,6 +2,7 @@ package com.finalauth.backend.auth.jwt;
 
 import com.finalauth.backend.user.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -50,15 +51,23 @@ public class JwtTokenProvider {
 		return claims.getSubject();
 	}
 
-	public boolean isValid(String token) {
+	public TokenStatus validate(String token) {
 		try {
 			Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-			return true;
+			return TokenStatus.VALID;
+		} catch (ExpiredJwtException ex) {
+			return TokenStatus.EXPIRED;
 		} catch (JwtException | IllegalArgumentException ex) {
-			return false;
+			return TokenStatus.INVALID;
 		}
 	}
 
 	public record GeneratedAccessToken(String token, Instant expiresAt) {
+	}
+
+	public enum TokenStatus {
+		VALID,
+		EXPIRED,
+		INVALID
 	}
 }

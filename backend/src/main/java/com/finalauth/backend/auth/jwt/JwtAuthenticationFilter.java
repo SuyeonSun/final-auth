@@ -19,6 +19,8 @@ import java.util.Optional;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+	public static final String TOKEN_STATUS_ATTRIBUTE = "com.finalauth.backend.auth.jwt.tokenStatus";
+
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
 
@@ -35,19 +37,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	) throws ServletException, IOException {
 		String token = resolveToken(request);
 
-		if (token != null && jwtTokenProvider.isValid(token)) {
-			String userId = jwtTokenProvider.parseUserId(token);
-			Optional<User> user = userRepository.findById(userId);
+		if (token != null) {
+			JwtTokenProvider.TokenStatus status = jwtTokenProvider.validate(token);
+			request.setAttribute(TOKEN_STATUS_ATTRIBUTE, status);
 
-			user.ifPresent(value -> {
-				List<GrantedAuthority> authorities = value.getRoles().stream()
-						.map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-						.toList();
+			if (status == JwtTokenProvider.TokenStatus.VALID) {
+				String userId = jwtTokenProvider.parseUserId(token);
+				Optional<User> user = userRepository.findById(userId);
 
-				UsernamePasswordAuthenticationToken authentication =
-						new UsernamePasswordAuthenticationToken(value.getId(), null, authorities);
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-			});
+				user.ifPresent(value -> {
+					List<GrantedAuthority> authorities = value.getRoles().stream()
+							.map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+							.toList();
+
+					UsernamePasswordAuthenticationToken authentication =
+							new UsernamePasswordAuthenticationToken(value.getId(), null, authorities);
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				});
+			}
 		}
 
 		filterChain.doFilter(request, response);

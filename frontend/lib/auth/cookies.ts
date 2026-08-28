@@ -15,32 +15,26 @@ export const AUTH_COOKIE_BASE_OPTIONS = {
   sameSite: "lax",
 } as const;
 
-function parseExpiresAt(expiresAt: string) {
-  const expires = new Date(expiresAt);
-
-  if (Number.isNaN(expires.getTime())) {
-    throw new Error("백엔드 토큰 만료 시간이 올바르지 않습니다.");
-  }
-
-  return expires;
-}
-
 export function setAccessTokenCookie(
   response: NextResponse,
   token: AccessTokenData,
 ) {
+  // expires를 access token 자체의 만료 시각에 맞추면, 만료되는 순간 브라우저가
+  // 쿠키를 스스로 지워버려서 백엔드가 만료된 토큰을 받아볼 기회조차 없어진다.
+  // refresh_token이 살아있는 한 계속 실려 보내지도록 세션 쿠키로 둔다.
   response.cookies.set(AUTH_COOKIE.accessToken, token.accessToken, {
     ...AUTH_COOKIE_BASE_OPTIONS,
-    expires: parseExpiresAt(token.accessTokenExpiresAt),
     path: "/",
   });
 }
 
 export function setAuthCookies(response: NextResponse, tokens: TokenPair) {
   setAccessTokenCookie(response, tokens);
+  // access_token과 같은 이유로 refresh_token도 세션 쿠키로 둔다 — expires를 RT
+  // 자체 만료시각에 맞추면 만료되는 순간 브라우저가 지워버려서, 백엔드가 만료된
+  // RT를 받아보고 AUTH_REFRESH_TOKEN_EXPIRED로 구분해줄 기회조차 사라진다.
   response.cookies.set(AUTH_COOKIE.refreshToken, tokens.refreshToken, {
     ...AUTH_COOKIE_BASE_OPTIONS,
-    expires: parseExpiresAt(tokens.refreshTokenExpiresAt),
     path: "/api/auth",
   });
 }
