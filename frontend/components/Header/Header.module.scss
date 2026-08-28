@@ -1,0 +1,25 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #dce2ed;
+  background: #fff;
+}
+
+.logo {
+  color: #172033;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.user {
+  color: #172033;
+  font-weight: 700;
+}
+
+.loginLink {
+  color: #315bd6;
+  font-weight: 700;
+  text-decoration: none;
+}

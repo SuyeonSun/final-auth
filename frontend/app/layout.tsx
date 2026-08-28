@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { Header } from "@/components/Header/Header";
 import { AppProviders } from "@/providers/AppProviders";
 
 import "./globals.scss";
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ko">
       <body>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <Header />
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

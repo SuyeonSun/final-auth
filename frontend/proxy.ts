@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { PUBLIC_ROUTES } from "@/constants/auth";
 import { AUTH_COOKIE } from "@/lib/auth/cookies";
-
-const PUBLIC_ROUTES = new Set(["/login", "/register"]);
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
